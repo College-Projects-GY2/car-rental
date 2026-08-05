@@ -41,4 +41,54 @@ public class RentalSystem {
             System.out.println("Warning: Cars array is full. Cannot add new car.");
         }
     }
+    // משימה 9: השכרת רכב
+    public boolean rentCar(String customerId, String licensePlate) {
+        boolean customerExists = false;
+
+        // סריקת לקוחות
+        for (int i = 0; i < customerCount; i++) {
+            if (customers[i].getId().equals(customerId)) {
+                customerExists = true;
+                break;
+            }
+        }
+
+        if (!customerExists) {
+            System.out.println("Customer not found.");
+            return false;
+        }
+
+        // סריקת רכבים
+        for (int i = 0; i < carCount; i++) {
+            if (cars[i].getLicensePlate().equals(licensePlate)) {
+                if (!cars[i].isRented()) {
+                    cars[i].setRented(true);
+                    return true;
+                } else {
+                    System.out.println("Car is already rented.");
+                    return false;
+                }
+            }
+        }
+
+        System.out.println("Car not found.");
+        return false;
+    }
+
+    // משימה 8: החזרת רכב
+    public boolean returnCar(String licensePlate) {
+        for (int i = 0; i < carCount; i++) {
+            if (cars[i].getLicensePlate().equals(licensePlate)) {
+                if (cars[i].isRented()) {
+                    cars[i].setRented(false);
+                    return true;
+                } else {
+                    System.out.println("Car is not currently rented.");
+                    return false;
+                }
+            }
+        }
+        System.out.println("Car not found.");
+        return false;
+    }
 }
