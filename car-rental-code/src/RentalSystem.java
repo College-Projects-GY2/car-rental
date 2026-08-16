@@ -52,7 +52,6 @@ public class RentalSystem {
         }
     }
 
-
     // פונקציית עזר: בודקת אם לקוח עם תעודת זהות כזו כבר קיים
     private boolean isCustomerExists(String id) {
         for (int i = 0; i < customerCount; i++) {
@@ -72,7 +71,6 @@ public class RentalSystem {
         }
         return false; // הרכב לא קיים במערכת
     }
-
 
     // משימה חדשה: מחיקת רכב מהמערכת ללא השארת חורים במערך
     public boolean removeCar(String licensePlate) {
@@ -99,6 +97,9 @@ public class RentalSystem {
 
         // אם סיימנו את הלולאה ולא מצאנו את הרכב
         System.out.println("Error: Car with license plate " + licensePlate + " not found.");
+        return false; // חסר: הוספת return false במקרה שלא מצאנו את הרכב
+    } // חסר: הוספת סוגר מסולסל לסגירת הפונקציה removeCar
+
     // משימה 9: השכרת רכב
     public boolean rentCar(String customerId, String licensePlate) {
         boolean customerExists = false;
@@ -148,5 +149,67 @@ public class RentalSystem {
         }
         System.out.println("Car not found.");
         return false;
+    }
+
+    // --------------------------------------------------------
+    // משימות חדשות: הפקת דוחות, עדכונים וחיפושים
+    // --------------------------------------------------------
+
+    // משימה 1: הפקת דוח רכבים פנויים
+    public void printAvailableCars() {
+        System.out.println("\n--- Available Cars ---");
+        int availableCount = 0; // מונה פנימי כדי לדעת אם מצאנו רכבים
+
+        for (int i = 0; i < carCount; i++) {
+            // בודקים אם הרכב *לא* מושכר
+            if (!cars[i].isRented()) {
+                System.out.println(cars[i].toString());
+                availableCount++;
+            }
+        }
+
+        // אם סיימנו את הלולאה והמונה נשאר 0, סימן שאין רכבים פנויים
+        if (availableCount == 0) {
+            System.out.println("There are currently no cars available for rent.");
+        }
+        System.out.println("----------------------\n");
+    }
+
+    // משימה 2: עדכון מספר טלפון של לקוח
+    public boolean updateCustomerPhone(String customerId, String newPhone) {
+        for (int i = 0; i < customerCount; i++) {
+            // מחפשים את הלקוח לפי תעודת זהות
+            if (customers[i].getId().equals(customerId)) {
+                // משתמשים ב-Setter של המחלקה Customer כדי לעדכן
+                customers[i].setPhoneNumber(newPhone);
+                System.out.println("Success: Phone number updated for customer ID " + customerId);
+                return true;
+            }
+        }
+
+        // אם הלולאה הסתיימה ולא עשינו return, הלקוח לא קיים
+        System.out.println("Error: Customer with ID " + customerId + " not found.");
+        return false;
+    }
+
+    // משימה 3: חיפוש רכב זמין לפי יצרן
+    public void searchAvailableCarsByMake(String make) {
+        System.out.println("\n--- Searching for available '" + make + "' cars ---");
+        int matchCount = 0;
+
+        for (int i = 0; i < carCount; i++) {
+            // בודקים שני תנאים:
+            // 1. האם היצרן תואם (equalsIgnoreCase מתעלם מאותיות גדולות/קטנות)
+            // 2. האם הרכב פנוי להשכרה
+            if (cars[i].getMake().equalsIgnoreCase(make) && !cars[i].isRented()) {
+                System.out.println(cars[i].toString());
+                matchCount++;
+            }
+        }
+
+        if (matchCount == 0) {
+            System.out.println("No available cars found for make: " + make);
+        }
+        System.out.println("-----------------------------------------\n");
     }
 }
