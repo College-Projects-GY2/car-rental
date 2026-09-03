@@ -1,0 +1,215 @@
+public class RentalSystem {
+    private Car[] cars;
+    private Customer[] customers;
+    private User[] users; // הוגדר בסקופ המקורי
+
+    private int carCount;
+    private int customerCount;
+    private int userCount;
+
+    private User currentUser;
+
+    public RentalSystem(int maxCars, int maxCustomers, int maxUsers) {
+        cars = new Car[maxCars];
+        customers = new Customer[maxCustomers];
+        users = new User[maxUsers];
+
+        carCount = 0;
+        customerCount = 0;
+        userCount = 0;
+        currentUser = null;
+    }
+
+    // שדרוג משימה 5: הוספת לקוח (עם מניעת כפילויות)
+    public void addCustomer(Customer customer) {
+        if (isCustomerExists(customer.getId())) {
+            System.out.println("Error: Customer with ID " + customer.getId() + " already exists in the system.");
+            return; // עצירת הפונקציה
+        }
+
+        if (customerCount < customers.length) {
+            customers[customerCount] = customer;
+            customerCount++;
+            System.out.println("Customer added successfully.");
+        } else {
+            System.out.println("Warning: Customers array is full. Cannot add new customer.");
+        }
+    }
+
+    // שדרוג משימה 6: הוספת רכב (עם מניעת כפילויות)
+    public void addCar(Car car) {
+        if (isCarExists(car.getLicensePlate())) {
+            System.out.println("Error: Car with license plate " + car.getLicensePlate() + " already exists in the system.");
+            return; // עצירת הפונקציה
+        }
+
+        if (carCount < cars.length) {
+            cars[carCount] = car;
+            carCount++;
+            System.out.println("Car added successfully.");
+        } else {
+            System.out.println("Warning: Cars array is full. Cannot add new car.");
+        }
+    }
+
+    // פונקציית עזר: בודקת אם לקוח עם תעודת זהות כזו כבר קיים
+    private boolean isCustomerExists(String id) {
+        for (int i = 0; i < customerCount; i++) {
+            if (customers[i].getId().equals(id)) {
+                return true; // נמצאה כפילות
+            }
+        }
+        return false; // הלקוח לא קיים במערכת
+    }
+
+    // פונקציית עזר: בודקת אם רכב עם מספר רישוי כזה כבר קיים
+    private boolean isCarExists(String licensePlate) {
+        for (int i = 0; i < carCount; i++) {
+            if (cars[i].getLicensePlate().equals(licensePlate)) {
+                return true; // נמצאה כפילות
+            }
+        }
+        return false; // הרכב לא קיים במערכת
+    }
+
+    // משימה חדשה: מחיקת רכב מהמערכת ללא השארת חורים במערך
+    public boolean removeCar(String licensePlate) {
+        for (int i = 0; i < carCount; i++) {
+            if (cars[i].getLicensePlate().equals(licensePlate)) {
+
+                // מניעת מחיקה של רכב שמושכר כרגע
+                if (cars[i].isRented()) {
+                    System.out.println("Error: Cannot remove a rented car. It must be returned first.");
+                    return false;
+                }
+
+                // העתקת הרכב האחרון במערך אל המיקום של הרכב שאנחנו מוחקים
+                cars[i] = cars[carCount - 1];
+
+                // ניקוי התא האחרון ועדכון המונה
+                cars[carCount - 1] = null;
+                carCount--;
+
+                System.out.println("Car removed successfully.");
+                return true;
+            }
+        }
+
+        // אם סיימנו את הלולאה ולא מצאנו את הרכב
+        System.out.println("Error: Car with license plate " + licensePlate + " not found.");
+        return false; // חסר: הוספת return false במקרה שלא מצאנו את הרכב
+    } // חסר: הוספת סוגר מסולסל לסגירת הפונקציה removeCar
+
+    // משימה 9: השכרת רכב
+    public boolean rentCar(String customerId, String licensePlate) {
+        boolean customerExists = false;
+
+        // סריקת לקוחות
+        for (int i = 0; i < customerCount; i++) {
+            if (customers[i].getId().equals(customerId)) {
+                customerExists = true;
+                break;
+            }
+        }
+
+        if (!customerExists) {
+            System.out.println("Customer not found.");
+            return false;
+        }
+
+        // סריקת רכבים
+        for (int i = 0; i < carCount; i++) {
+            if (cars[i].getLicensePlate().equals(licensePlate)) {
+                if (!cars[i].isRented()) {
+                    cars[i].setRented(true);
+                    return true;
+                } else {
+                    System.out.println("Car is already rented.");
+                    return false;
+                }
+            }
+        }
+
+        System.out.println("Car not found.");
+        return false;
+    }
+
+    // משימה 8: החזרת רכב
+    public boolean returnCar(String licensePlate) {
+        for (int i = 0; i < carCount; i++) {
+            if (cars[i].getLicensePlate().equals(licensePlate)) {
+                if (cars[i].isRented()) {
+                    cars[i].setRented(false);
+                    return true;
+                } else {
+                    System.out.println("Car is not currently rented.");
+                    return false;
+                }
+            }
+        }
+        System.out.println("Car not found.");
+        return false;
+    }
+
+    // --------------------------------------------------------
+    // משימות חדשות: הפקת דוחות, עדכונים וחיפושים
+    // --------------------------------------------------------
+
+    // משימה 1: הפקת דוח רכבים פנויים
+    public void printAvailableCars() {
+        System.out.println("\n--- Available Cars ---");
+        int availableCount = 0; // מונה פנימי כדי לדעת אם מצאנו רכבים
+
+        for (int i = 0; i < carCount; i++) {
+            // בודקים אם הרכב *לא* מושכר
+            if (!cars[i].isRented()) {
+                System.out.println(cars[i].toString());
+                availableCount++;
+            }
+        }
+
+        // אם סיימנו את הלולאה והמונה נשאר 0, סימן שאין רכבים פנויים
+        if (availableCount == 0) {
+            System.out.println("There are currently no cars available for rent.");
+        }
+        System.out.println("----------------------\n");
+    }
+
+    // משימה 2: עדכון מספר טלפון של לקוח
+    public boolean updateCustomerPhone(String customerId, String newPhone) {
+        for (int i = 0; i < customerCount; i++) {
+            // מחפשים את הלקוח לפי תעודת זהות
+            if (customers[i].getId().equals(customerId)) {
+                // משתמשים ב-Setter של המחלקה Customer כדי לעדכן
+                customers[i].setPhoneNumber(newPhone);
+                System.out.println("Success: Phone number updated for customer ID " + customerId);
+                return true;
+            }
+        }
+
+        // אם הלולאה הסתיימה ולא עשינו return, הלקוח לא קיים
+        System.out.println("Error: Customer with ID " + customerId + " not found.");
+        return false;
+    }
+
+    // משימה 3: חיפוש רכב זמין לפי יצרן
+    public void searchAvailableCarsByMake(String make) {
+        System.out.println("\n--- Searching for available '" + make + "' cars ---");
+        int matchCount = 0;
+
+        for (int i = 0; i < carCount; i++) {
+            // בודקים שני תנאים:
+            // 1. האם היצרן תואם (equalsIgnoreCase מתעלם מאותיות גדולות/קטנות)
+            // 2. האם הרכב פנוי להשכרה
+            if (cars[i].getMake().equalsIgnoreCase(make) && !cars[i].isRented()) {
+                System.out.println(cars[i].toString());
+                matchCount++;
+            }
+        }
+
+        if (matchCount == 0) {
+            System.out.println("No available cars found for make: " + make);
+        }
+        System.out.println("-----------------------------------------\n");
+    }
+}
